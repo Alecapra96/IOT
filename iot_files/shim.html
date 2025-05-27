@@ -1,0 +1,772 @@
+
+<!-- saved from url=(0132)blob:https://2macprvg5zb8xl8h7wq3d9waxf7qy59a48bz935acu53u8komm-h761100114.scf.usercontent.goog/5075b636-8847-4847-ac70-ea3b213e2843 -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6ImY2ZTAxMDEwMWQ1NmE1NmIyZDY4Y2U3NDZkNmI5YzJlMmFlYzU5ZGQiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6XC9cL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbVwvZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwOTE4OTkxNTIzMjk1MzgwMzE0NCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJleHAiOjE3NDgzODAyNjEsImlhdCI6MTc0ODM3NjY2MSwiYWxnIjoiUlMyNTYifQ.bPUo9Bo-Q3ngglODE5KtD0Xl9hxIYeTTRnOGZfvIZXuB7ak89hFylS_yaF5_PTWx6pnB4kAdsC2W8iuKDt4il9FOd_mDJK2gCTk7DiumngrHeQ33bxml_AKVlQNfapq43hyYGDtb8eqxdLDjDFe1FuNcRUi7RbXIz0yLOrtlC_9b3GchAG-C8Dw7LymetdHgPYDUCaMsey5oJPMZY8_HF4BmxCQnikYEi-1Zw-XzI0gVIQtfn_1qAtGUGJ-sBxrkRKFuWEjDwbIn-FdoFVNAzvk6au0vr-3sRjO-B_Mta2rEKwZ7je2BlaX0aeRtpHkKfBI_5ll_kzIwxXSXPYfXkQ","c_7b84882a748b69d4_iotDigitalTwinsInfographic-129")</script><script>(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script>let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          const mediaPromiseId = nextMediaPromiseId++;
+          const promise = new Promise((resolve, reject) => {
+            pendingMediaResolvers[mediaPromiseId] = (granted) => {
+              delete pendingMediaResolvers[mediaPromiseId];
+              if (granted) {
+                if (originalGetUserMedia) {
+                  originalGetUserMedia(constraints).then(resolve).catch(reject);
+                } else {
+                  reject(new Error("Original getUserMedia not available."));
+                }
+              } else {
+              reject(new DOMException('Permission denied', 'NotAllowedError'));
+            }
+          };
+        });
+
+        window.parent.postMessage({
+          type: 'requestMediaPermission',
+          constraints: constraints,
+          promiseId: mediaPromiseId,
+        }, '*');
+
+        return promise;
+      },
+      writable: false,
+      configurable: false
+    });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script>(function() {
+  const originalFetch = window.fetch;
+  const googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning',
+  ];
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: 'models/' + modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+})();</script><script>(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: IoT y Gemelos Digitales - Voyansi</title>
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc; /* Light gray, almost white */
+            color: #272727; /* Voyansi Dark Gray for body text */
+        }
+        .voyansi-purple { color: #6a0edc; }
+        .bg-voyansi-purple { background-color: #6a0edc; }
+        .border-voyansi-purple { border-color: #6a0edc; }
+        
+        .voyansi-gray-medium { color: #606060; }
+        .voyansi-gray-dark { color: #272727; }
+
+        .section-title {
+            font-size: 1.75rem; /* 28px */
+            font-weight: 600; /* Poppins Semibold */
+            color: #6a0edc; /* Voyansi Purple */
+            margin-bottom: 1.5rem; /* 24px */
+            display: flex;
+            align-items: center;
+        }
+        .section-title svg {
+            margin-right: 0.75rem; /* 12px */
+            color: #6a0edc; /* Voyansi Purple */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* 12px */
+            padding: 1.5rem; /* 24px */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            margin-bottom: 1.5rem; /* 24px */
+            border: 1px solid #e5e7eb; /* Light border for cards */
+        }
+        .tag {
+            display: inline-block;
+            background-color: #f3e8ff; /* Light Purple */
+            color: #6a0edc; /* Voyansi Purple */
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500; /* Poppins Medium */
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #6a0edc; /* Voyansi Purple */
+            margin: 0 0.5rem;
+        }
+        /* Estilos para la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb; /* Gris claro */
+            padding: 0.75rem; /* 12px */
+            text-align: left;
+            color: #272727; /* Voyansi Dark Gray */
+        }
+        th {
+            background-color: #f3f4f6; /* Gris muy claro */
+            color: #6a0edc; /* Voyansi Purple */
+            font-weight: 600; /* Poppins Semibold */
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb; /* Gris extra claro */
+        }
+        .image-container {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 0.5rem; /* 8px */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        }
+        /* Custom text colors for Poppins weights */
+        .poppins-regular { font-weight: 400; }
+        .poppins-medium { font-weight: 500; }
+        .poppins-semibold { font-weight: 600; }
+        .poppins-bold { font-weight: 700; }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: #6a0edc; /* Voyansi Purple for headers */
+        }
+        h1 { font-weight: 700; /* Poppins Bold */ }
+        h2.font-semibold { font-weight: 600; /* Poppins Semibold */ } /* For card titles */
+        strong { color: #6a0edc; /* Voyansi Purple for emphasis */ }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mx-auto{margin-left:auto;margin-right:auto}.mb-12{margin-bottom:3rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mt-12{margin-top:3rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.flex{display:flex}.grid{display:grid}.h-10{height:2.5rem}.h-8{height:2rem}.w-8{width:2rem}.max-w-5xl{max-width:64rem}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.gap-4{gap:1rem}.gap-8{gap:2rem}.gap-x-8{column-gap:2rem}.gap-y-4{row-gap:1rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.overflow-x-auto{overflow-x:auto}.rounded-lg{border-radius:0.5rem}.border-t{border-top-width:1px}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.p-4{padding:1rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pl-4{padding-left:1rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-medium{font-weight:500}.font-semibold{font-weight:600}.italic{font-style:italic}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}@media (min-width: 768px){.md\:h-12{height:3rem}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:p-8{padding:2rem}.md\:text-5xl{font-size:3rem;line-height:1}}@media (min-width: 1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style></head>
+<body class="voyansi-gray-dark">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl mb-4">🛰️ IoT + Gemelos Digitales 🧠</h1>
+            <p class="text-xl voyansi-gray-medium">Visualizando el Futuro Conectado: Una Fusión Inteligente</p>
+        </header>
+
+        <section class="mb-12">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-3">¿Qué es IoT? (Internet de las Cosas)</h2>
+                    <p class="voyansi-gray-medium">Dispositivos físicos (sensores, actuadores, PLCs, etc.) que recopilan y transmiten datos del mundo real, permitiendo monitorear y controlar objetos y entornos de forma remota.</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-3">¿Qué son los Gemelos Digitales?</h2>
+                    <p class="voyansi-gray-medium">Réplicas virtuales dinámicas de activos físicos, procesos o sistemas. Reflejan su estado en tiempo real o histórico, permitiendo análisis, simulación y optimización.</p>
+                </div>
+            </div>
+            <div class="card mt-8">
+                <p class="text-center text-lg">Este <strong>dashboard</strong> actúa como la capa de visualización y control, permitiendo representar estos gemelos de forma modular y personalizable.</p>
+            </div>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
+                Integración con el Mundo Físico
+            </h2>
+            <p class="mb-4 voyansi-gray-medium">El sistema consume datos en tiempo real o diferido desde diversas fuentes IoT:</p>
+            <ul class="list-disc list-inside space-y-1 voyansi-gray-medium mb-6 pl-4">
+                <li>Dispositivos que publican por <strong>MQTT</strong>.</li>
+                <li>Plataformas como <strong>AWS IoT, Azure IoT Hub, ThingsBoard</strong>.</li>
+                <li>Sistemas <strong>SCADA</strong> o <strong>PLCs</strong> (exportando por OPC-UA, Modbus, HTTP).</li>
+                <li><strong>Gateways industriales</strong> (convirtiendo datos a JSON/REST/MQTT).</li>
+            </ul>
+            <p class="mb-4 poppins-semibold">Flujo de Datos Desacoplado:</p>
+            <div class="flex flex-wrap items-center justify-center p-4 bg-purple-50 rounded-lg text-center">
+                <span class="font-medium voyansi-gray-dark">[Dispositivo IoT]</span>
+                <span class="flow-arrow">→</span>
+                <span class="font-medium voyansi-gray-dark">[Backend / Broker MQTT]</span>
+                <span class="flow-arrow">→</span>
+                <span class="font-medium voyansi-gray-dark">[API]</span>
+                <span class="flow-arrow">→</span>
+                <span class="font-medium voyansi-gray-dark">[Dashboard]</span>
+            </div>
+            <p class="mt-4 text-sm text-gray-500">El frontend puede recibir datos en tiempo real, actualizaciones push, o usar WebSockets/MQTT directamente.</p>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"></path></svg>
+                Widgets para Visualización y Control
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 voyansi-gray-medium">
+                <div class="p-4 bg-slate-50 rounded-lg"><strong>🔢 Sensores:</strong> Temperatura, humedad, voltaje, etc.</div>
+                <div class="p-4 bg-slate-50 rounded-lg"><strong>📊 Gráficas:</strong> Barras, donut, series de tiempo.</div>
+                <div class="p-4 bg-slate-50 rounded-lg"><strong>🚦 Alarmas y Estados:</strong> On/Off, fallas, niveles críticos.</div>
+                <div class="p-4 bg-slate-50 rounded-lg"><strong>🧱 Controles:</strong> Actuadores, sliders, botones.</div>
+                <div class="p-4 bg-slate-50 rounded-lg"><strong>🧩 Gemelos Digitales Visuales:</strong> Modelos 2D/3D, paneles.</div>
+            </div>
+            <div class="image-container">
+                <img src="https://developer.doc.autodesk.com/bPlouYTd/A360-hyperion-develop-4/_images/sprite-viewable-objects.jpg" alt="Visualización de estado de ventiladores en tiempo real" onerror="this.onerror=null;this.src=&#39;https://placehold.co/600x400/e0f2fe/0c4a6e?text=Imagen+No+Disponible&#39;;">
+            </div>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path></svg>
+                Capacidades Clave de Visualización IoT en 3D
+            </h2>
+            <ul class="space-y-3 voyansi-gray-medium">
+                <li><strong>Sprites y Sensores 2D:</strong> Iconos en el modelo 3D que representan dispositivos IoT, mostrando datos detallados al interactuar.</li>
+                <li><strong>Mapas de Calor (Heatmaps):</strong> Superposición de colores en el modelo para indicar valores (temperatura, CO₂, etc.), facilitando la detección visual de zonas críticas.</li>
+                <li><strong>Datos en Tiempo Real:</strong> Actualización dinámica de métricas en el modelo, con herramientas de timeline para análisis históricos.</li>
+                <li><strong>Conectividad Múltiple:</strong> Adaptadores para bases de datos IoT comunes (Azure Time Series, AWS IoT, etc.).</li>
+                <li><strong>Gráficos y Dashboards Embebidos:</strong> Integración de librerías (ej. Apache ECharts) para mostrar indicadores y alertas en la interfaz 3D.</li>
+            </ul>
+            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                <div class="image-container">
+                    <img src="https://user-images.githubusercontent.com/10786558/79815858-5b757e00-83b4-11ea-8052-5f42f89b519e.gif" alt="Sensores en un gemelo digital mostrando datos en tiempo real" onerror="this.onerror=null;this.src=&#39;https://placehold.co/600x400/e0f2fe/0c4a6e?text=Imagen+No+Disponible&#39;;">
+                </div>
+                <div class="image-container">
+                     <img src="https://raw.githubusercontent.com/deepalics0044/_GIF/refs/heads/master/_GIF/Wifi%20signal%20attenuation%20in%20a%20building1.gif" alt="Visualización de la intensidad de señal WiFi en un edificio" onerror="this.onerror=null;this.src=&#39;https://placehold.co/600x400/e0f2fe/0c4a6e?text=Imagen+No+Disponible&#39;;">
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.39m3.421 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a15.995 15.995 0 00-4.648 4.763m0 0a15.998 15.998 0 00-1.622 3.389m3.42-3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763"></path></svg>
+                Ejemplos de Sensores IoT Visualizables
+            </h2>
+            <p class="mb-4 voyansi-gray-medium">Cualquier sensor conectado a una plataforma IoT puede integrarse. Algunos ejemplos:</p>
+            <div class="flex flex-wrap">
+                <span class="tag">🌡️ Temperatura (°C/°F)</span>
+                <span class="tag">💧 Humedad Relativa (%)</span>
+                <span class="tag">💨 Presión (bar, Pa)</span>
+                <span class="tag">👋 Vibración (acelerómetros)</span>
+                <span class="tag">🏭 Gases/Partículas (CO₂, CO, CH₄)</span>
+                <span class="tag">⚡ Medidores de Energía (kW, kWh)</span>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                <div class="image-container">
+                    <img src="https://raw.githubusercontent.com/deepalics0044/_GIF/refs/heads/master/_GIF/IoTHotspot1.gif" alt="Sensor de temperatura en tuberías mostrando datos en tiempo real" onerror="this.onerror=null;this.src=&#39;https://placehold.co/600x400/e0f2fe/0c4a6e?text=Imagen+No+Disponible&#39;;">
+                </div>
+                <div class="image-container">
+                    <img src="https://developer.doc.autodesk.com/bPlouYTd/A360-hyperion-develop-4/_images/mouse-hover.gif" alt="Múltiples sensores mostrando datos en tiempo real en un modelo 3D" onerror="this.onerror=null;this.src=&#39;https://placehold.co/600x400/e0f2fe/0c4a6e?text=Imagen+No+Disponible&#39;;">
+                </div>
+            </div>
+        </section>
+        
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Ideal para Proyectos Como
+            </h2>
+            <div class="grid md:grid-cols-2 gap-x-8 gap-y-4 voyansi-gray-medium">
+                <div><strong>🏭 Fábricas Inteligentes:</strong> Monitoreo de producción, calidad, mantenimiento predictivo.</div>
+                <div><strong>🌱 Agricultura de Precisión:</strong> Monitoreo de cultivos, riego, condiciones climáticas.</div>
+                <div><strong>🏗️ Monitoreo Estructural:</strong> Vigilancia de puentes, edificios, infraestructuras críticas.</div>
+                <div><strong>⚡ Energía y Utilities:</strong> Gestión de redes eléctricas, subestaciones, optimización de consumo.</div>
+                <div><strong>🏠 Domótica y Smart Cities:</strong> Control de iluminación, climatización, seguridad.</div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Casos de Uso por Industria
+            </h2>
+            <div class="space-y-6">
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-2">⛏️ Minería</h3>
+                    <p class="voyansi-gray-medium">Supervisión de equipos (temperatura motor, vibraciones, combustible) y entornos remotos (gases peligrosos, calidad del aire) para mejorar seguridad y eficiencia.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-2">🏗️ Construcción</h3>
+                    <p class="voyansi-gray-medium">Vigilancia de integridad estructural (deformación, inclinación) y condiciones ambientales en obra (curado de hormigón, confort).</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-2">💡 Energía</h3>
+                    <p class="voyansi-gray-medium">Modelado de subestaciones, parques eólicos, plantas generadoras. Monitoreo remoto de transformadores, voltaje, corriente, temperatura para mantenimiento predictivo.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"></path></svg>
+                Beneficios Empresariales
+            </h2>
+            <ul class="list-disc list-inside space-y-2 voyansi-gray-medium pl-4">
+                <li><strong>Mayor eficiencia operativa:</strong> Decisiones proactivas con datos en tiempo real, optimización de rutinas.</li>
+                <li><strong>Reducción de costos de mantenimiento:</strong> Mantenimiento preventivo basado en predicción de fallas.</li>
+                <li><strong>Decisiones basadas en datos:</strong> Información objetiva y visual para la dirección.</li>
+                <li><strong>Mejora en seguridad y sustentabilidad:</strong> Advertencia de riesgos, protección de personal y medio ambiente.</li>
+            </ul>
+            <p class="mt-4 voyansi-gray-medium italic">"Un gemelo digital interactivo impulsa la transformación digital: combina BIM con IoT para generar insights más ricos, incrementando la eficiencia y reduciendo el tiempo de inactividad."</p>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"></path></svg>
+                Tabla Resumen: Sensores IoT y sus Aplicaciones
+            </h2>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sensor IoT</th>
+                            <th>¿Qué mide?</th>
+                            <th>Uso o Industria Ejemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Temperatura</td>
+                            <td>Grados (°C, °F)</td>
+                            <td>Monitoreo de motores, hornos o ambientes (minería, construcción)</td>
+                        </tr>
+                        <tr>
+                            <td>Humedad</td>
+                            <td>% Relativa (%)</td>
+                            <td>Control climático en túneles, sótanos, almacenes</td>
+                        </tr>
+                        <tr>
+                            <td>Presión</td>
+                            <td>Bar, Pa</td>
+                            <td>Sistemas hidráulicos y neumáticos en maquinaria pesada</td>
+                        </tr>
+                        <tr>
+                            <td>Vibración</td>
+                            <td>Aceleración (m/s²)</td>
+                            <td>Monitoreo de ejes y bombas; detección de desgastes</td>
+                        </tr>
+                        <tr>
+                            <td>Energía</td>
+                            <td>Potencia, kWh</td>
+                            <td>Medidores eléctricos en subestaciones, plantas o edificios</td>
+                        </tr>
+                        <tr>
+                            <td>Gases (CO₂, CH₄)</td>
+                            <td>Concentración (ppm)</td>
+                            <td>Detección de gases tóxicos en minas y control de calidad</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-12 card">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
+                Extensibilidad y Futuro
+            </h2>
+            <ul class="list-disc list-inside space-y-2 voyansi-gray-medium pl-4">
+                <li>Creación de <strong>nuevos tipos de widgets</strong> extendiendo plantillas (ej. React).</li>
+                <li>Integración de bibliotecas 3D como <strong>React Three Fiber</strong> para gemelos más inmersivos.</li>
+                <li>Potencial para <strong>multiusuario, roles y permisos</strong> en futuras versiones.</li>
+            </ul>
+        </section>
+
+        <footer class="text-center mt-12 py-8 border-t border-gray-300">
+            <img src="https://www.voyansi.com/wp-content/uploads/2024/02/HEXAGON-VOYANSI-LOGO-footer.svg" alt="Voyansi part of Hexagon Logo" class="h-10 md:h-12 mx-auto mb-4" onerror="this.onerror=null;this.src=&#39;https://placehold.co/200x50/cccccc/333333?text=Voyansi+Logo&#39;;">
+            <p class="voyansi-gray-medium text-sm poppins-medium">ELEVATED perspective that accelerates your business</p>
+            <p class="text-gray-500 text-xs mt-3">© <span id="currentYear">2025</span> - Transformando Datos en Decisiones Inteligentes.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Script para el año actual en el footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+
+
+
+</body></html>
